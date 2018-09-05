@@ -36,7 +36,6 @@ var (
 	err                                                                                          error
 	Sprintf                                                                                      = fmt.Sprintf
 
-	// использовал массив для упорядочивания выводимых в чат команд:
 	commands = []string{
 		"/info",
 		"/balance",
@@ -65,22 +64,6 @@ var (
 		"/NewSignal":           " Создать новый сигнал ",
 		"/sellAllAltcoins":     " Продать все альткоины по рынку",
 		"/BBTurn":              " Топ пар BB",
-
-		// TODO:
-		//"/informators_stats":   " Статистика информаторов",
-		//"/getIndicators",
-		//"/monitoring":          " Запуск мониторинга сигнальных каналов", // " Запуск мониторинга для контроля роста альткоинов"
-		//"/quit": " Quit ",
-		//"BTC-*": " Получить текущие значения для ask, bid BTC-* валюты ",
-		//"/removeLastMes": " Удаление последнего сообщения",
-		//"/showEvents": " События ",
-		//"/pumpsAndDumps": " Pump&Dump ",
-		//"/profit": " Статистика по ордерам ",
-		// "/help":       " Получить список доступных для бота команд ",
-		// "/stop":       " Остановка мониторинга ",
-		//" 7 /sell ":       " инициализация ордера на покупку монеты. ",
-		//" 8 /buy ":        " инициализация ордера на продажу монеты. ",
-		//" 9 /history ":    " тестируем. ",
 	}
 
 	// список доступных языков
@@ -104,12 +87,7 @@ func RefreshApprovedChans() {
 	if err != nil {
 		fmt.Printf("RefreshApprovedChans Marshal err = %+v", err)
 	}
-	//dir, err := os.Getwd()
-	//if err != nil {
-	//	fmt.Println("RefreshApprovedChans Getwd err = ", err)
-	//}
-
-	//if err = ioutil.WriteFile("./json_files/approved_signal_channels.json", approvedChansMapJson, 0644); err != nil {
+	
 	if err = ioutil.WriteFile(config.PathsToJsonFiles.PathToApprovedSignalChannels, approvedChansMapJson, 0644); err != nil {
 		fmt.Println("RefreshApprovedChans Getwd err = ", err)
 	}
@@ -132,7 +110,6 @@ func main() {
 	if markets, err := thebotguysBittrex.GetMarkets(); err != nil { // markets
 		fmt.Println("||| thebotguysBittrex.GetMarkets err = ", err)
 		if marketsSummaries, err := thebotguysBittrex.GetMarketSummaries(); err != nil { // markets
-			fmt.Println("||| thebotguysBittrex.GetMarketSummaries err = ", err)
 		} else {
 			for _, market := range marketsSummaries {
 				if strings.Contains(market.MarketName, "BTC-") { // market.BaseCurrency == "BTC"
@@ -148,26 +125,7 @@ func main() {
 			}
 		}
 	}
-	//fmt.Println("||| main() len(telegram.BittrexBTCCoinList) = ", len(telegram.BittrexBTCCoinList))
-
-	//file1, _ := os.Open("approved_signal_channels.json")
-	//err := json.NewDecoder(file1).Decode(&approvedChans)
-	//fmt.Println("||| approvedChans = ", approvedChans)
-	//approvedSignalChannels, er0r := json.Marshal(approvedChans)
-	//fmt.Println("||| approvedSignalChannels = ", approvedSignalChannels)
-	//data, err := ioutil.ReadFile("./json_files/approved_signal_channels.json")
-
-	//data, err := ioutil.ReadFile(config.PathsToJsonFiles.PathToApprovedSignalChannels)
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return
-	//}
-	//err = json.Unmarshal(data, &approvedChans)
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return
-	//}
-
+	
 	if _, err := mongo.All(); err != nil {
 		log.Println("||| Error while All: ", err)
 	}
@@ -176,28 +134,9 @@ func main() {
 
 	for id, userObj := range user.UserPropMap {
 		mongo.UpsertUserByID(id, userObj)
-		//if _, err := mongo.AllSignals(id); err != nil {
-		//	log.Println("||| Error while All: ", err)
-		//}
-
-		//signals, err := mongo.GetSignalsPerUser(id)
-		//if err != nil {
-		//	log.Println("||| Error while GetSignalsPerUser: ", err)
-		//	return
-		//}
-		//user.TrackedSignalPerUserMap[id] = signals
 	}
 
 	user.GetTrackedSignals()
-
-	//for userID, signals := range user.TrackedSignalPerUserMap {
-	//	for _, signal := range signals {
-	//		if signal.ID == 0 {
-	//			signal.ID = time.Now().Unix() + rand.Int63()
-	//		}
-	//	}
-	//	mongo.InsertSignalsPerUser(userID, signals)
-	//}
 
 	go getBTCPrice()
 
@@ -226,26 +165,13 @@ func main() {
 			fmt.Println("||| CallbackQuery mesChatUserFisrtName = ", mesChatUserFisrtName)
 			mesChatUserLastName = update.CallbackQuery.Message.From.LastName
 			messID = update.CallbackQuery.Message.MessageID
-			//fmt.Println("||| update.CallbackQuery.Message.From.FirstName = ", update.CallbackQuery.Message.From.FirstName)
-			//fmt.Println("||| update.CallbackQuery.Message.Chat.FirstName = ", update.CallbackQuery.Message.Chat.FirstName)
-			//fmt.Println("||| update.CallbackQuery.Message.From.ID = ", update.CallbackQuery.Message.From.ID)
-			//fmt.Println("||| update.CallbackQuery.Message.Chat.ID = ", update.CallbackQuery.Message.Chat.ID)
-			//fmt.Println("||| update.CallbackQuery.Message.From.UserName = ", update.CallbackQuery.Message.From.UserName)
-			//fmt.Println("||| update.CallbackQuery.Message.Chat.UserName = ", update.CallbackQuery.Message.Chat.UserName)
 		} else if update.InlineQuery != nil {
-			//query := update.InlineQuery.Query
 			mesText = update.InlineQuery.Query
 			mesChatUserName = update.InlineQuery.From.UserName
 			mesChatUserID = strconv.Itoa(update.InlineQuery.From.ID)
-			//mesChatUserID = fmt.Sprintln(update.CallbackQuery.Message.Chat.ID)
 			mesChatUserFisrtName = update.InlineQuery.From.FirstName
 			mesChatUserLastName = update.InlineQuery.From.LastName
 			fmt.Println("||| InlineQuery mesChatUserFisrtName = ", mesChatUserFisrtName)
-
-			//fmt.Println("||| update.InlineQuery.From.UserName = ", update.InlineQuery.From.UserName)
-			//fmt.Println("||| update.InlineQuery.From.ID = ", update.InlineQuery.From.ID)
-			////fmt.Println("||| update.InlineQuery.From.ID = ", update.InlineQuery.)
-			//fmt.Println("||| query = " + query)
 		} else {
 			if update.Message == nil {
 				continue
@@ -258,48 +184,12 @@ func main() {
 				fmt.Println("||| update.Message mesChatUserFisrtName = ", mesChatUserFisrtName)
 
 				mesChatUserLastName = update.Message.From.LastName
-				//fmt.Println("update.Message.From.ID = ", update.Message.From.ID)
-				fmt.Println("update.Message.Chat.ID = ", update.Message.Chat.ID)
-				fmt.Println("update.Message.Chat.UserName = ", update.Message.Chat.UserName)
-				fmt.Println("update.Message.Chat.InviteLink = ", update.Message.Chat.InviteLink)
-				fmt.Println("update.Message.Chat.Title = ", update.Message.Chat.Title)
 
-				if update.Message.ForwardFromChat != nil {
-					fmt.Printf("\n\n\n\n||| message = %+v\n\n\n\n", update.Message)
-					fmt.Printf("\n\n\n\n||| update.Message.ForwardFrom = %+v\n\n\n\n", update.Message.ForwardFrom)
-					fmt.Printf("\n\n\n\n||| update.Message.Chat = %+v\n\n\n\n", update.Message.Chat)
-					fmt.Printf("\n\n\n\n||| update.Message.Contact = %+v\n\n\n\n", update.Message.Contact)
-					fmt.Printf("\n\n\n\n||| update.Message.Document = %+v\n\n\n\n", update.Message.Document)
-					fmt.Printf("\n\n\n\n||| update.Message.Entities = %+v\n\n\n\n", update.Message.Entities)
-					fmt.Printf("\n\n\n\n||| update.Message.Game = %+v\n\n\n\n", update.Message.Game)
-					fmt.Printf("\n\n\n\n||| update.Message.Invoice = %+v\n\n\n\n", update.Message.Invoice)
-					fmt.Printf("\n\n\n\n||| update.Message.Venue = %+v\n\n\n\n", update.Message.Venue)
-
-					fmt.Println("update.Message.ForwardFromChat.Type = ", update.Message.ForwardFromChat.Type)
-					fmt.Println("update.Message.ForwardFromChat.FirstName = ", update.Message.ForwardFromChat.FirstName)
-					fmt.Println("update.Message.ForwardFromChat.Photo = ", update.Message.ForwardFromChat.Photo)
-					fmt.Println("update.Message.ForwardFromChat.ID = ", update.Message.ForwardFromChat.ID)
-					fmt.Println("update.Message.ForwardFromChat.UserName = ", update.Message.ForwardFromChat.UserName)
-					fmt.Println("update.Message.ForwardFromChat.InviteLink = ", update.Message.ForwardFromChat.InviteLink)
-					fmt.Println("update.Message.ForwardFromChat.Title = ", update.Message.ForwardFromChat.Title)
-					fmt.Println("update.Message.ForwardFromChat.Description = ", update.Message.ForwardFromChat.Description)
-					fmt.Println("update.Message.ForwardFromChat.ChatConfig = ", update.Message.ForwardFromChat.ChatConfig())
-				}
-
-				fmt.Println("pdate.ChannelPost.Chat.UserName = ", update.ChannelPost)
-				//.Chat.UserName
-				//fmt.Println("update.Message.From.UserName = ", update.Message.From.UserName)
-				//fmt.Println("update.Message.Chat.UserName = ", update.Message.Chat.UserName)
-				//fmt.Println("update.Message.Chat.FirstName = ", update.Message.Chat.FirstName)
-				//fmt.Println("update.Message.From.FirstName = ", update.Message.From.FirstName)
 				messID = update.Message.MessageID
 			}
 		}
 
 		userObj, ok := user.UserSt.Load(mesChatUserID)
-		//fmt.Println("||| mesText = ", mesText)
-		//fmt.Println("||| userObj.IsMonitoring = ", userObj.IsMonitoring)
-		//fmt.Println("||| userObj.MonitoringStop = ", userObj.MonitoringStop)
 
 		if !ok {
 			var userNameAny string
@@ -333,10 +223,7 @@ func main() {
 					}
 				}
 			}
-			//fmt.Println("||| 111 mesText = ", mesText)
-
-			//fmt.Println("||| main: GetMarkets: len(telegram.BittrexBTCCoinList) = ", len(telegram.BittrexBTCCoinList))
-
+		
 			if userObj.UserNameAny == "" {
 				if mesChatUserName == "" {
 					userObj.UserNameAny = "f:" + mesChatUserFisrtName + "l:" + mesChatUserLastName
@@ -344,13 +231,11 @@ func main() {
 					userObj.UserNameAny = "u:" + mesChatUserName
 				}
 				go user.RefreshUsersData()
-				//mongo.UpdateUser(mesChatUserID, bson.M{"$set": bson.M{"user_name_any": userObj.UserNameAny}})
 			}
 
 			if userObj.BuyType == "" {
 				userObj.BuyType = user.Market
 				go user.RefreshUsersData()
-				//mongo.UpdateUser(mesChatUserID, bson.M{"$set": bson.M{"buy_type": userObj.BuyType}})
 				if err := mongo.UpsertUserByID(mesChatUserID, userObj); err != nil {
 					fmt.Println("||| UpsertUserByID BuyType err = ", err)
 				}
@@ -359,9 +244,6 @@ func main() {
 			if !userObj.StoplossEnable {
 				userObj.StoplossEnable = true
 				userObj.StoplossPercent = 1
-				//mongo.UpdateUser(mesChatUserID, bson.M{"$set":
-				//bson.M{"stoploss_percent": userObj.StoplossPercent,
-				//	"stoploss_enable": userObj.StoplossEnable}})
 
 				go user.RefreshUsersData()
 			}
@@ -370,35 +252,10 @@ func main() {
 				userObj.TakeprofitEnable = true
 				userObj.TakeprofitPercent = 1
 
-				//mongo.UpdateUser(mesChatUserID, bson.M{"$set":
-				//bson.M{"takeprofit_percent": userObj.TakeprofitPercent,
-				//	"takeprofit_enable": userObj.TakeprofitEnable}})
-
 				go user.RefreshUsersData()
 			}
 
-			//if strings.Contains(mesText, "Остановить мониторинг") || mesText == "/stop" {
-			//	fmt.Println("||| main /stop")
-			//	//telegram.CLIworks = false
-			//	fmt.Println("||| Остановить мониторинг: mesChatUserName = ", mesChatUserName)
-			//	msg := tgbotapi.NewMessage(mesChatID, smiles.WARNING_SIGN+" *Происходит остановка мониторинга, подождите*. "+smiles.WARNING_SIGN)
-			//	msg.ParseMode = "Markdown"
-			//	if _, err := bot.Send(msg); err != nil {
-			//		log.Println("||| main: error while message sending 25: err = ", err)
-			//	}
-			//	userObj, _ = user.UserSt.Load(mesChatUserID)
-			//	userObj.MonitoringStop = true
-			//	userObj.IsMonitoring = false
-			//	user.UserSt.Store(mesChatUserID, userObj);
-			//	go RefreshUsersData()
-			//	continue
-			//}
-			//if !userObj.IsMonitoring
 			{
-				//if userObj.OrderFlag {
-				//	IsOrderLogick(mesText, userObj, mesChatID, mesChatUserID, msg, bot)
-				//	continue
-				//} else
 				{
 					// для того, чтобы избежать принудительной логики (введите канал для подписки)
 					if userObj.LastKeyboardButton != "" {
@@ -411,25 +268,6 @@ func main() {
 						}
 					}
 
-					//if mesText == "/removeLastMes" {
-					//	if mess, err := bot.Send(tgbotapi.NewMessage(mesChatID, "asdsad")); err != nil {
-					//		log.Println("||| main: error while message sending CHECKING: err = ", err)
-					//	} else {
-					//		timer := time.NewTimer(time.Second * time.Duration(4))
-					//		<-timer.C
-					//		//bot.DeleteMessage(tgbotapi.DeleteMessageConfig{mess.Chat.ID, mess.MessageID})
-					//		//if _, err = bot.Send(tgbotapi.NewMessage(mesChatID, "sadeafdae")); err != nil {
-					//		//	log.Println("||| main: error while message sending CHECKING: err = ", err)
-					//		//}
-					//		//tgbotapi.NewEditMessageText(mess.Chat.ID, mess.MessageID, "11111")
-					//		//tgbotapi.NewEditMessageCaption(mess.Chat.ID, mess.MessageID, "wefewfde")
-					//		if _, err := bot.Send(tgbotapi.NewEditMessageText(mess.Chat.ID, mess.MessageID, "11111")); err != nil {
-					//			log.Println("||| main: error while message sending CHECKING: err = ", err)
-					//		}
-					//	}
-					//	continue
-					//}
-
 					if mesText == "/profit" || mesText == "/showEvents" || mesText == "Изменить язык" || mesText == "/pumpsAndDumps" || mesText == "/addSignalChannel" {
 						if err := telegram.SendMessageDeferred(mesChatID, "Данный функционал в разработке", "", nil); err != nil {
 							log.Println("||| main: error while message sending 23: err = ", err)
@@ -438,15 +276,13 @@ func main() {
 					}
 
 					if mesText == "/subscriptionsList" {
-						//fmt.Println("||| subscriptionsList len(userObj.Subscriptions) = ", len(userObj.Subscriptions))
 						if len(userObj.Subscriptions) == 0 {
 							if err := telegram.SendMessageDeferred(mesChatID, "На данный момент у вас отсутствуют подписки. "+
-							// из списка проверенных или
+								// из списка проверенных или
 								"Вы можете подписаться на канал для отслеживания сигналов предложив свой с помощью кнопки ниже.", "", nil); err != nil {
 								log.Println("||| main: error while message sending len(userObj.Subscriptions) == 0: err = ", err)
 							}
 						} else {
-							//fmt.Println("||| subscriptionsList 1 len(userObj.Subscriptions) = ", len(userObj.Subscriptions))
 							keyboardTesting := tgbotapi.InlineKeyboardMarkup{}
 							keyboardTrading := tgbotapi.InlineKeyboardMarkup{}
 
@@ -511,117 +347,9 @@ func main() {
 						}
 						// TODO: fix it
 						if len(approvedChans) > 1000 {
-							//msg = tgbotapi.NewMessage(mesChatID, "Подписаться:")
-							//var btnsSubscriptions, btnsArrows []tgbotapi.InlineKeyboardButton
-							//for _, approvedSCh := range approvedChans {
-							//	if len(userObj.Subscriptions) != 0 {
-							//		if _, ok := userObj.Subscriptions[approvedSCh]; !ok {
-							//			btn := tgbotapi.NewInlineKeyboardButtonData("Подписаться на "+approvedSCh, "/subscribe|"+approvedSCh)
-							//			btnsSubscriptions = append(btnsSubscriptions, btn)
-							//		}
-							//	} else {
-							//		btn := tgbotapi.NewInlineKeyboardButtonData("Подписаться на "+approvedSCh, "/subscribe|"+approvedSCh)
-							//		btnsSubscriptions = append(btnsSubscriptions, btn)
-							//	}
-							//}
-							//
-							//for i, btnSubscriptions := range btnsSubscriptions {
-							//	if i < 2 {
-							//		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, append([]tgbotapi.InlineKeyboardButton{}, btnSubscriptions))
-							//	}
-							//}
-							////btnRight := tgbotapi.NewInlineKeyboardButtonData(smiles.LEFTWARDS_ARROW_WITH_HOOK+"Назад", "/Left2") // mess.Chat.ID, mess.MessageID
-							////btnsArrows = append(btnsArrows, btnRight)
-							//btnLeft := tgbotapi.NewInlineKeyboardButtonData(smiles.RIGHTWARDS_ARROW_WITH_HOOK+"Далее", "/Right2")
-							//btnsArrows = append(btnsArrows, btnLeft)
-							//keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, btnsArrows)
-							//
-							//msg.ReplyMarkup = keyboard
-							//msg.ParseMode = "Markdown"
-							//if mes, err := bot.Send(msg); err != nil {
-							//	log.Println("||| main: error while message sending 31: err = ", err)
-							//} else {
-							//	ChatIDMesIDMap[mes.Chat.ID] = mes.MessageID
-							//}
+							
 						}
 						continue
-					}
-
-					if strings.Contains(mesText, "/Right") {
-						//index, _ := strconv.Atoi(strings.TrimPrefix(mesText, "/Right"))
-						//keyboard := tgbotapi.InlineKeyboardMarkup{}
-						//var btnsSubscriptions, btnsArrows []tgbotapi.InlineKeyboardButton
-						//for _, approvedSCh := range approvedChans {
-						//	if len(userObj.Subscriptions) != 0 {
-						//		if _, ok := userObj.Subscriptions[approvedSCh]; !ok {
-						//			btn := tgbotapi.NewInlineKeyboardButtonData("Подписаться на "+approvedSCh, "/subscribe|"+approvedSCh)
-						//			btnsSubscriptions = append(btnsSubscriptions, btn)
-						//		}
-						//	} else {
-						//		btn := tgbotapi.NewInlineKeyboardButtonData("Подписаться на "+approvedSCh, "/subscribe|"+approvedSCh)
-						//		btnsSubscriptions = append(btnsSubscriptions, btn)
-						//	}
-						//}
-						//for i := index; i < index+2; i++ {
-						//	if i == len(btnsSubscriptions) {
-						//		index = -2
-						//		break
-						//	}
-						//	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, append([]tgbotapi.InlineKeyboardButton{}, btnsSubscriptions[i]))
-						//}
-						//index += 2
-						//fmt.Println("||| len(btnsSubscriptions) = ", len(btnsSubscriptions))
-						////btnRight := tgbotapi.NewInlineKeyboardButtonData(smiles.LEFTWARDS_ARROW_WITH_HOOK+"Назад", "/Left"+strconv.Itoa(index)) // mess.Chat.ID, mess.MessageID
-						////btnsArrows = append(btnsArrows, btnRight)
-						//btnLeft := tgbotapi.NewInlineKeyboardButtonData(smiles.RIGHTWARDS_ARROW_WITH_HOOK+"Далее", "/Right"+strconv.Itoa(index))
-						//btnsArrows = append(btnsArrows, btnLeft)
-						//keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, btnsArrows)
-						//tgbotapi.NewEditMessageReplyMarkup(mesChatID, ChatIDMesIDMap[mesChatID], keyboard)
-						//if _, err := bot.Send(tgbotapi.NewEditMessageReplyMarkup(mesChatID, ChatIDMesIDMap[mesChatID], keyboard)); err != nil {
-						//	log.Println("||| main: error while message sending CHECKING: err = ", err)
-						//}
-						//continue
-					}
-
-					if strings.Contains(mesText, "/Left") {
-						//index, _ := strconv.Atoi(strings.TrimPrefix(mesText, "/Left"))
-						//keyboard := tgbotapi.InlineKeyboardMarkup{}
-						//var btnsSubscriptions, btnsArrows []tgbotapi.InlineKeyboardButton
-						//for _, approvedSCh := range approvedChans {
-						//	if len(userObj.Subscriptions) != 0 {
-						//		if _, ok := userObj.Subscriptions[approvedSCh]; !ok {
-						//			btn := tgbotapi.NewInlineKeyboardButtonData("Подписаться на "+approvedSCh, "/subscribe|"+approvedSCh)
-						//			btnsSubscriptions = append(btnsSubscriptions, btn)
-						//		}
-						//	} else {
-						//		btn := tgbotapi.NewInlineKeyboardButtonData("Подписаться на "+approvedSCh, "/subscribe|"+approvedSCh)
-						//		btnsSubscriptions = append(btnsSubscriptions, btn)
-						//	}
-						//}
-						//fmt.Println("||| index = ", index)
-						//for i := index; i > index-2; i-- {
-						//	if i < 0 {
-						//		index = len(btnsSubscriptions)
-						//		break
-						//	}
-						//	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, append([]tgbotapi.InlineKeyboardButton{}, btnsSubscriptions[i]))
-						//}
-						//
-						//index -= 2
-						//if index < 0 {
-						//	index = len(btnsSubscriptions) - 1
-						//}
-						//fmt.Println("||| len(btnsSubscriptions) = ", len(btnsSubscriptions))
-						////btnRight := tgbotapi.NewInlineKeyboardButtonData(smiles.LEFTWARDS_ARROW_WITH_HOOK+"Назад", "/Left"+strconv.Itoa(index)) // mess.Chat.ID, mess.MessageID
-						////btnsArrows = append(btnsArrows, btnRight)
-						//btnLeft := tgbotapi.NewInlineKeyboardButtonData(smiles.RIGHTWARDS_ARROW_WITH_HOOK+"Далее", "/Right"+strconv.Itoa(index))
-						//btnsArrows = append(btnsArrows, btnLeft)
-						//keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, btnsArrows)
-						//tgbotapi.NewEditMessageReplyMarkup(mesChatID, ChatIDMesIDMap[mesChatID], keyboard)
-						//if _, err := bot.Send(tgbotapi.NewEditMessageReplyMarkup(mesChatID, ChatIDMesIDMap[mesChatID], keyboard)); err != nil {
-						//	log.Println("||| main: error while message sending CHECKING: err = ", err)
-						//}
-						//continue
 					}
 
 					if strings.Contains(mesText, "/signal_edit_done_") {
@@ -631,7 +359,6 @@ func main() {
 							if signal.Status == user.EditableCoin {
 								if signal.SignalCoin == editableCoin {
 									signal.Status = user.IncomingCoin
-									//user.TrackedSignalSt.Store(mesChatUserID, trackedSignals)
 									user.TrackedSignalSt.UpdateOne(mesChatUserID, trackedSignals[i].ObjectID, trackedSignals[i])
 
 									if err := telegram.SendMessageDeferred(mesChatID, fmt.Sprintf("%s Поступил новый сигнал для отслеживания:\n%s", user.NewCoinAddedTag, user.SignalHumanizedView(*signal)), "Markdown", nil); err != nil {
@@ -646,26 +373,12 @@ func main() {
 					if strings.Contains(mesText, "/offerSubscription") {
 						userObj, _ = user.UserSt.Load(mesChatUserID)
 						userObj.LastKeyboardButton = "/offerSubscription"
-						//userObj.AddingSignalChannelFlag = true
 						user.UserSt.Store(mesChatUserID, userObj)
 						msgText := "Введите название канала или link (например - https://t.me/shavermaClub) (*канал должен быть публичный* - это можно определить по наличию link) и нажмите enter или же *просто сделайте репост*"
 						if err := telegram.SendMessageDeferred(mesChatID, msgText, "Markdown", nil); err != nil {
 							log.Println("||| main: error while message sending offerSubscription: err = ", err)
 						}
 						continue
-					}
-					if strings.Contains(mesText, "/subscribe|") {
-						//channelName := strings.TrimPrefix(mesText, "/subscribe|")
-						//userObj, _ = user.UserSt.Load(mesChatUserID)
-						//userObj.Subscriptions[channelName] = user.Active
-						//user.UserSt.Store(mesChatUserID, userObj)
-						//go RefreshUsersData()
-						//msg := tgbotapi.NewMessage(mesChatID, "Вы подписаны на *"+channelName+"*")
-						//msg.ParseMode = "Markdown"
-						//if _, err := bot.Send(msg); err != nil {
-						//	log.Println("||| main: error while message sending removeUserInfo: err = ", err)
-						//}
-						//continue
 					}
 
 					if strings.Contains(mesText, "/removeSubscription|") {
@@ -682,8 +395,6 @@ func main() {
 						}
 						user.UserSt.Store(mesChatUserID, userObj)
 						go user.RefreshUsersData()
-
-						//mongo.UpdateUser(mesChatUserID, bson.M{"$set": bson.M{"subscriptions": userObj.Subscriptions}})
 
 						continue
 					}
@@ -703,8 +414,6 @@ func main() {
 						}
 						user.UserSt.Store(mesChatUserID, userObj)
 						go user.RefreshUsersData()
-
-						//mongo.UpdateUser(mesChatUserID, bson.M{"$set": bson.M{"subscriptions": userObj.Subscriptions}})
 
 						continue
 					}
@@ -826,7 +535,6 @@ func main() {
 							log.Println("||| main: error while message sending monitoring_stats 0: err = ", err)
 						}
 						signalsMesHumanized, _ := user.OutputSignalChannelHumanizedView(mesChatUserID, "processing")
-						//signalsMesHumanized := user.TrackedSignalsHumanized[mesChatUserID]
 						if len(signalsMesHumanized) == 0 {
 							msgText = "На данный момент активных сигналов не обнаружено."
 							keyboard := tgbotapi.InlineKeyboardMarkup{}
@@ -874,11 +582,9 @@ func main() {
 										percentChange := (bid - signal.RealBuyPrice ) / (signal.RealBuyPrice / 100)
 										coinStr += fmt.Sprintf("Изменение цены по рынку: %.3f %%\n", percentChange)
 									}
-									//if signal.IsTrading {
 									ID := strconv.FormatInt(signal.ObjectID, 10)
 									btnSell := []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("Market sale", Sprintf("/monitoring_stats_sell_%s", ID))}
 									btns = append(btns, btnSell...)
-									//}
 								}
 								keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, btns)
 
@@ -888,8 +594,6 @@ func main() {
 									btnArr := []tgbotapi.InlineKeyboardButton{btnDone, btnRetryActive}
 									keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, btnArr)
 								}
-
-								// keyboard Markdown signalMesHumanized
 								if err := telegram.SendMessageDeferred(mesChatID, coinStr, "Markdown", keyboard); err != nil {
 									log.Println("||| main: error while message sending monitoring_stats 1: err = ", err)
 								}
@@ -902,7 +606,6 @@ func main() {
 					if strings.Contains(mesText, "/monitoring_stats_sell_") {
 						coinID := strings.TrimPrefix(mesText, "/monitoring_stats_sell_")
 						fmt.Println("||| monitoring_stats_sell_ coinID = ", coinID)
-
 						trackedSignals, _ := user.TrackedSignalSt.Load(mesChatUserID)
 						for i, signal := range trackedSignals {
 							if signal.Status == user.BoughtCoin {
@@ -928,7 +631,6 @@ func main() {
 											signal.Log = append(signal.Log, strSold)
 											signal.Status = user.SoldCoin
 											trackedSignals[i] = signal
-											//user.TrackedSignalSt.Store(mesChatUserID, trackedSignals)
 											user.TrackedSignalSt.UpdateOne(mesChatUserID, trackedSignals[i].ObjectID, trackedSignals[i])
 
 											msgText := user.CoinSoldTag + " " + strSold
@@ -958,7 +660,6 @@ func main() {
 													signal.SSPIsGenerated,
 													reason), "")
 												signal.Log = append(signal.Log, droppedStr)
-												//user.TrackedSignalSt.Store(mesChatUserID, trackedSignals)
 												user.TrackedSignalSt.UpdateOne(mesChatUserID, trackedSignals[i].ObjectID, trackedSignals[i])
 
 												msgText := fmt.Sprintf("%s %s Баланс по монете %s равен 0", user.TradeModeTag, user.TradeModeTroubleTag, signal.SignalCoin)
@@ -1003,7 +704,6 @@ func main() {
 													strSold := user.CoinSold(signal.SignalCoin, signal.RealSellPrice, signal.RealBuyPrice, signal.SignalSellPrice, signal.SignalStopPrice, signal.BTCProfit, signal.IsTrading)
 													signal.Log = append(signal.Log, strSold)
 													trackedSignals[i] = signal
-													//user.TrackedSignalSt.Store(mesChatUserID, trackedSignals)
 													user.TrackedSignalSt.UpdateOne(mesChatUserID, trackedSignals[i].ObjectID, trackedSignals[i])
 
 													msgText := user.TradeModeTag + " " + user.CoinSoldTag + " " + strSold
@@ -1049,7 +749,6 @@ func main() {
 										btns = []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("Активировать усреднение", Sprintf("/activate_averaging_%s", activeCoinID), )}
 										keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, btns)
 									} else if signal.Status == user.EditableCoin {
-										//btns = []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("Изменить тип закупки", Sprintf("/change_buy_type_%s", activeCoinID), )}
 										btns = []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("Торг->Тест", Sprintf("/change_is_trading_type_%s", activeCoinID), )}
 										keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, btns)
 									}
@@ -1093,7 +792,6 @@ func main() {
 							trackedSignals[index].SSPIsGenerated,
 							reason), "")
 						trackedSignals[index].Log = append(trackedSignals[index].Log, droppedStr)
-						//user.TrackedSignalSt.Store(mesChatUserID, trackedSignals)
 						user.TrackedSignalSt.UpdateOne(mesChatUserID, trackedSignals[index].ObjectID, trackedSignals[index])
 
 						msgText := user.CoinDroppedTag + " " + Sprintf(droppedStr)
@@ -1194,7 +892,6 @@ func main() {
 										ID := strconv.FormatInt(trackedSignal.ObjectID, 10)
 
 										if trackedSignal.Status == user.IncomingCoin || trackedSignal.Status == user.EditableCoin {
-											//btns = []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("Изменить тип закупки", Sprintf("/change_buy_type_%s", signal.SignalCoin), )}
 											btns = []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData(Sprintf("Изменить объём закупки (%.4f BTC)", trackedSignal.BuyBTCQuantity), Sprintf("/change_buy_BTC_quantity_%s", ID))}
 											keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, btns)
 										}
@@ -1269,7 +966,6 @@ func main() {
 								log.Println("||| main: error while message sending monitoring_stats 0: err = ", err)
 							}
 						} else {
-							//fmt.Println("||| len(signalsMesHumanized) = ", len(signalsMesHumanized))
 							i := 0
 							for signalMesHumanized, _ := range signalsMesHumanized {
 								if i == len(signalsMesHumanized)-1 {
@@ -1309,11 +1005,6 @@ func main() {
 										wg.Done()
 									}()
 
-									//var ask, bid float64
-									//if ask, bid, err = monitoring.GetAskBid(userObj.BittrexObj, balance.Currency); err != nil {
-									//	fmt.Printf("||| main: GetAskBid error: %v\n", err)
-									//}
-
 								}(balance, i)
 							}
 							wg.Wait()
@@ -1329,35 +1020,6 @@ func main() {
 						continue
 					}
 
-					//if strings.ToLower(mesText) == "/monitoring" {
-					//	//telegram.CLIworks = true
-					//	userObj, _ := user.UserSt.Load(mesChatUserID)
-					//	userObj.IsMonitoring = true
-					//	userObj.MonitoringStop = false
-					//	user.UserSt.Store(mesChatUserID, userObj);
-					//	go RefreshUsersData()
-					//	msg := tgbotapi.NewMessage(mesChatID, "*Мониторинг сигналов запущен. Для остановки нажмите */stop *или кнопку ниже.*")
-					//	keyboard := tgbotapi.ReplyKeyboardMarkup{}
-					//	btnStop := tgbotapi.KeyboardButton{}
-					//	btnStop.Text = smiles.BLACK_LARGE_SQUARE + "  Остановить мониторинг  " + smiles.BLACK_LARGE_SQUARE
-					//	keyboard.Keyboard = append(keyboard.Keyboard, []tgbotapi.KeyboardButton{btnStop})
-					//	keyboard.ResizeKeyboard = true
-					//	msg.ReplyMarkup = keyboard
-					//	msg.ParseMode = "Markdown"
-					//	if _, err := bot.Send(msg); err != nil {
-					//		log.Println("||| main: error while message sending 51: err = ", err)
-					//	}
-					//	if trackedSignals, ok := user.TrackedSignalPerUserMap[mesChatUserID]; !ok || trackedSignals == nil {
-					//		msg := tgbotapi.NewMessage(mesChatID, "*На данный момент сигналов для отслеживания нет, подождите.*")
-					//		msg.ParseMode = "Markdown"
-					//		if _, err := bot.Send(msg); err != nil {
-					//			fmt.Println("||| Monitoring: error while message sending: ", err)
-					//		}
-					//	}
-					//
-					//	//go monitoring.SignalMonitoring(mesChatID, bot, config.KeyboardMainMenu, mesChatUserID)
-					//	continue
-					//}
 					if userObj.ChangeMonitorFreqFlag {
 						if freq, err := strconv.Atoi(mesText); err == nil {
 							if freq < 1 || freq > 60 {
@@ -1710,11 +1372,6 @@ func main() {
 							log.Println("||| main: error while message sending 39: err = ", err)
 						}
 
-						// только для меня это работает:
-						if mesChatUserID == "413075018" {
-							//go cryptoSignal.Scan(mesChatID, userObj)
-						}
-
 						go monitoring.SignalMonitoring(mesChatUserID)
 						continue
 					}
@@ -1736,18 +1393,6 @@ func main() {
 						keyboard := tgbotapi.ReplyKeyboardMarkup{ResizeKeyboard: true}
 						{
 							userObj, _ = user.UserSt.Load(mesChatUserID)
-
-							//btnMonitoringFreq := tgbotapi.KeyboardButton{}
-							//btnMonitoringFreq.Text = "Изменить частоту мониторинга (" + strconv.Itoa(userObj.MonitoringInterval) + " сек)"
-							//keyboard.Keyboard = append(keyboard.Keyboard, []tgbotapi.KeyboardButton{btnMonitoringFreq})
-
-							//btnMonitoring := tgbotapi.KeyboardButton{}
-							//if userObj.MonitoringChanges {
-							//	btnMonitoring.Text = "Выключить оповещения " + smiles.CHART_WITH_DOWNWARDS_TREND
-							//} else {
-							//	btnMonitoring.Text = "Включить оповещения " + smiles.CHART_WITH_DOWNWARDS_TREND
-							//}
-							//keyboard.Keyboard = append(keyboard.Keyboard, []tgbotapi.KeyboardButton{btnMonitoring})
 						}
 
 						{
@@ -1762,55 +1407,22 @@ func main() {
 						}
 
 						{
-							// TODO: back it
-							//btnBuyMarket := tgbotapi.KeyboardButton{}
-							//userObj, _ = user.UserSt.Load(mesChatUserID)
-							//if userObj.BuyType == user.Market {
-							//	btnBuyMarket.Text = "Покупка по рынку -> по bid"
-							//} else if userObj.BuyType == user.Bid {
-							//	btnBuyMarket.Text = "Покупка по bid -> по рынку"
-							//}
-							//keyboard.Keyboard = append(keyboard.Keyboard, []tgbotapi.KeyboardButton{btnBuyMarket})
-						}
-
-						{
 							userObj, _ = user.UserSt.Load(mesChatUserID)
 							btnSetBuyBTCQuantity := tgbotapi.KeyboardButton{}
 							btnSetBuyBTCQuantity.Text = fmt.Sprintf("Изменить объём закупки (%.5f BTC)", userObj.BuyBTCQuantity)
 							keyboard.Keyboard = append(keyboard.Keyboard, []tgbotapi.KeyboardButton{btnSetBuyBTCQuantity})
 						}
 
-						//{
-						//	btnLang := tgbotapi.KeyboardButton{}
-						//	btnLang.Text = "Изменить язык"
-						//	keyboard.Keyboard = append(keyboard.Keyboard, []tgbotapi.KeyboardButton{btnLang})
-						//}
-
 						{
 							btnStopLoss := tgbotapi.KeyboardButton{}
 							userObj, _ = user.UserSt.Load(mesChatUserID)
 							btnStopLoss.Text = "Изменить стоп лосс (" + strconv.Itoa(userObj.StoplossPercent) + " %)"
-							//btnStopLossActivation := tgbotapi.KeyboardButton{}
-							//if userObj.StoplossEnable {
-							//	btnStopLossActivation.Text = "Выключить авто стоп лосс"
-							//} else {
-							//	btnStopLossActivation.Text = "Включить авто стоп лосс"
-							//}
-							//keyboard.Keyboard = append(keyboard.Keyboard, []tgbotapi.KeyboardButton{btnStopLossActivation, btnStopLoss})
 							keyboard.Keyboard = append(keyboard.Keyboard, []tgbotapi.KeyboardButton{btnStopLoss})
 						}
 
 						{
 							btnTakeProfit := tgbotapi.KeyboardButton{}
 							userObj, _ = user.UserSt.Load(mesChatUserID)
-							btnTakeProfit.Text = "Изменить тейк профит (" + strconv.Itoa(userObj.TakeprofitPercent) + " %)"
-							//btnTakeProfitActivation := tgbotapi.KeyboardButton{}
-							//if userObj.TakeprofitEnable {
-							//	btnTakeProfitActivation.Text = "Выключить авто тейк профит"
-							//} else {
-							//	btnTakeProfitActivation.Text = "Включить авто тейк профит"
-							//}
-							//keyboard.Keyboard = append(keyboard.Keyboard, []tgbotapi.KeyboardButton{btnTakeProfitActivation, btnTakeProfit})
 							keyboard.Keyboard = append(keyboard.Keyboard, []tgbotapi.KeyboardButton{btnTakeProfit})
 						}
 
@@ -1826,7 +1438,6 @@ func main() {
 					}
 
 					if strings.Contains(mesText, "Покупка по bid -> по рынку") {
-						//userObj, _ = user.UserSt.Load(mesChatUserID)
 						userObj.BuyType = user.Market
 						if err := mongo.UpsertUserByID(mesChatUserID, userObj); err != nil {
 							fmt.Println("||| UpsertUserByID BuyType err = ", err)
@@ -1917,7 +1528,6 @@ func main() {
 						userObj, _ = user.UserSt.Load(mesChatUserID)
 						userObj.ChangeStopLossFlag = true
 						user.UserSt.Store(mesChatUserID, userObj)
-						//fmt.Println("||| 1 changeStopLossFlag = ", userObj.ChangeStopLossFlag)
 						msgText := "Введите целое число от 1 до 100 (процент стоп лосс при мониторинге) и нажмите enter"
 						if err := telegram.SendMessageDeferred(mesChatID, msgText, "", config.KeyboardMainMenu); err != nil {
 							log.Println("||| main: error while message sending 44: err = ", err)
@@ -1954,7 +1564,6 @@ func main() {
 						userObj, _ = user.UserSt.Load(mesChatUserID)
 						userObj.ChangeStopLossFlag = true
 						user.UserSt.Store(mesChatUserID, userObj)
-						//fmt.Println("||| 1 changeStopLossFlag = ", userObj.ChangeStopLossFlag)
 						msgText := "Введите целое число от 1 до 100 (процент стоп лосс при мониторинге) и нажмите enter"
 						if err := telegram.SendMessageDeferred(mesChatID, msgText, "", config.KeyboardMainMenu); err != nil {
 							log.Println("||| main: error while message sending 44: err = ", err)
@@ -2203,26 +1812,6 @@ func main() {
 							}(coin, i)
 						}
 						wg.Wait()
-						//
-						//BBStatus := "*Монеты с перечечением ценой LBB:*\n"
-						//
-						//for coin := range telegram.BittrexBTCCoinList {
-						//	BBLowerValueI, _ := BBLowerMap.Load(coin)
-						//	askI, _ := AskMap.Load(coin)
-						//	if BBLowerValueI != nil && askI != nil {
-						//		BBStatus += "[" + coin + "](https://bittrex.com/Market/Index?MarketName=BTC-" + coin + ") "
-						//		ask := askI.(float64)
-						//		BBLowerValue := BBLowerValueI.([]float64)
-						//		lastLowBB := BBLowerValue[len(BBLowerValue)-1]
-						//		BBStatus += Sprintf("LBB = %.8f ", lastLowBB)
-						//		BBStatus += Sprintf("Аск = %.8f ", ask)
-						//		BBStatus += "\n"
-						//	}
-						//}
-						//
-						//if err := telegram.SendMessageDeferred(mesChatID, BBStatus, "Markdown", nil); err != nil {
-						//	log.Println("||| main: error while message sending 59: err = ", err)
-						//}
 						continue
 					}
 
@@ -2445,32 +2034,6 @@ func main() {
 								}
 							}
 
-							//ping, err := client.Ping()
-							//if err != nil {
-							//	log.Println("||| main: error while binance ping: err = ", err)
-							//}
-							//
-							//fmt.Printf("||| main: binance ping = %+v\n", ping)
-							//
-							//info, err := client.GetExchangeInfo()
-							//if err != nil {
-							//	log.Println("||| main: error while binance info: err = ", err)
-							//}
-							//
-							//fmt.Printf("||| main: binance info = %+v\n", info)
-							//
-							//
-							//
-							//
-							//
-							//positions, err := client.GetPositions()
-							//if err != nil {
-							//	log.Println("||| main: error while binance GetPositions: err = ", err)
-							//}
-							//
-							//fmt.Printf("||| main: binance GetPositions positions = %+v\n", positions)
-							//fmt.Printf("||| main: binance GetPositions len(positions) = %+v\n", len(positions))
-
 							account, err := client.GetAccountInfo()
 							if err != nil {
 								log.Println("||| main: error while binance GetAccountInfo: err = ", err)
@@ -2494,10 +2057,6 @@ func main() {
 									binanceTotalBTC += price.Price * (balance.Free + balance.Locked)
 								}
 							}
-
-							//fmt.Println("||| btcPrice = ", btcPrice)
-							//fmt.Printf("btcPrice: %T \n", btcPrice)
-							//fmt.Printf("BTCBalance = %+v ", BTCBalance)
 
 							msgText := Sprintf("*Bittrex*:\nДоступно: %.8f %s\n", BTCBalance.Available, BTCBalance.Currency) +
 								Sprintf("Адрес %s кошелька: %s\n", BTCBalance.Currency, BTCBalance.CryptoAddress)
@@ -2625,7 +2184,6 @@ func main() {
 								}
 							}
 							go user.RefreshUsersData()
-							//msg = tgbotapi.NewMessage(286496819, mesChatUserID+"|"+chanName+"|JOIN_REQUEST")
 							continue
 						}
 
@@ -2714,7 +2272,6 @@ func main() {
 
 												ID := strconv.FormatInt(signal.ObjectID, 10)
 												if signal.Status == user.IncomingCoin || signal.Status == user.EditableCoin {
-													//btns = []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("Изменить тип закупки", Sprintf("/change_buy_type_%s", signal.SignalCoin), )}
 													btns = []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData(Sprintf("Изменить объём закупки (%.4f BTC)", signal.BuyBTCQuantity), Sprintf("/change_buy_BTC_quantity_%s", ID))}
 													keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, btns)
 												}
@@ -2804,7 +2361,6 @@ func main() {
 												ID := strconv.FormatInt(signal.ObjectID, 10)
 
 												if signal.Status == user.IncomingCoin || signal.Status == user.EditableCoin {
-													//btns = []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("Изменить тип закупки", Sprintf("/change_buy_type_%s", signal.SignalCoin), )}
 													btns = []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData(Sprintf("Изменить объём закупки (%.4f BTC)", signal.BuyBTCQuantity), Sprintf("/change_buy_BTC_quantity_%s", ID))}
 													keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, btns)
 												}
@@ -2840,86 +2396,6 @@ func main() {
 							}
 							continue
 						}
-
-						//if strings.Contains(userObj.LastKeyboardButton, "/RSITop") && mesText != "" {
-						//	fmt.Println("||| RSITop 0")
-						//	if !strings.Contains(userObj.LastKeyboardButton, "_TO_PROCEED_") {
-						//		userObj.LastKeyboardButton = ""
-						//		user.UserSt.Store(mesChatUserID, userObj)
-						//		continue
-						//	}
-						//
-						//	switch mesText {
-						//	case "oneMin", "fiveMin", "thirtyMin", "hour", "week", "day", "month":
-						//	default:
-						//		continue
-						//	}
-						//	var wg sync.WaitGroup
-						//	var coinArr []string
-						//	m := new(sync.Map)
-						//
-						//	msgText := smiles.WARNING_SIGN + " *Происходит обработка данных1111, подождите*. " + smiles.WARNING_SIGN
-						//	if err := telegram.SendMessageDeferred(mesChatID, msgText, "Markdown", nil); err != nil {
-						//		log.Println("||| main: error while message sending 59: err = ", err)
-						//	}
-						//	for coin := range telegram.BittrexBTCCoinList {
-						//		coinArr = append(coinArr, coin)
-						//	}
-						//	for i, coin := range coinArr {
-						//		wg.Add(1)
-						//		go func(coin string, i int) {
-						//			defer func() {
-						//				wg.Done()
-						//			}()
-						//			indicatorData := cryptoSignal.HandleIndicators("rsi", "BTC-"+coin, mesText, 14, userObj)
-						//			if len(indicatorData) > 0 {
-						//				m.Store(coin, indicatorData[len(indicatorData)-1])
-						//			}
-						//		}(coin, i)
-						//	}
-						//	wg.Wait()
-						//	var RSIArr []float64
-						//	RSImap := map[float64]string{}
-						//	for coin := range telegram.BittrexBTCCoinList {
-						//		rsi, _ := m.Load(coin)
-						//		if rsi != nil {
-						//			RSImap[rsi.(float64)] = coin
-						//			RSIArr = append(RSIArr, rsi.(float64))
-						//		}
-						//	}
-						//	sort.Float64s(RSIArr)
-						//	RSIArr = RSIArr[:15]
-						//
-						//	RSIStatus := "*Топ 15 монет с минимальным RSI:*\n"
-						//	fmt.Println("||| RSITop 1")
-						//
-						//	for _, rsiVal := range RSIArr {
-						//		coin := RSImap[rsiVal]
-						//
-						//		var ask, bid float64
-						//		if ask, bid, err = monitoring.GetAskBid(userObj.BittrexObj, coin); err != nil {
-						//			fmt.Printf("||| main: GetAskBid error: %v\n", err)
-						//		}
-						//		var percentSpreadStr string
-						//		if bid > 0 && ask > 0 {
-						//			percentSpread := (ask - bid) / (ask / 100)
-						//			percentSpreadStr = fmt.Sprintf("*Спред*: %.2f%%", percentSpread)
-						//		}
-						//
-						//		fmt.Println("||| RSITop 2")
-						//		fmt.Println("||| RSITop trend = ", trend)
-						//
-						//		summary, _ := userObj.BittrexObj.GetMarketSummary("BTC-" + coin)
-						//		RSIStatus += fmt.Sprintf("%s: *RSI* = %.2f %% %s (%s)", "["+coin+"](https://bittrex.com/Market/Index?MarketName=BTC-"+coin+")", rsiVal, fmt.Sprintf("(*V* = %.2f BTC)", summary[0].BaseVolume), percentSpreadStr)
-						//
-						//		fmt.Println(fmt.Sprintf("*Тренд*: %s\n", trend))
-						//	}
-						//
-						//	if err := telegram.SendMessageDeferred(mesChatID, RSIStatus, "Markdown", nil); err != nil {
-						//		log.Println("||| main: error while message sending 59: err = ", err)
-						//	}
-						//	continue
-						//}
 
 						if strings.Contains(userObj.LastKeyboardButton, "/changeSignalTakeprofit") && mesText != "" {
 							if !strings.Contains(userObj.LastKeyboardButton, "_TO_PROCEED_") {
@@ -2976,7 +2452,6 @@ func main() {
 												ID := strconv.FormatInt(signal.ObjectID, 10)
 
 												if signal.Status == user.IncomingCoin || signal.Status == user.EditableCoin {
-													//btns = []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("Изменить тип закупки", Sprintf("/change_buy_type_%s", signal.SignalCoin), )}
 													btns = []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData(Sprintf("Изменить объём закупки (%.4f BTC)", signal.BuyBTCQuantity), Sprintf("/change_buy_BTC_quantity_%s", ID))}
 													keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, btns)
 												}
@@ -3028,10 +2503,6 @@ func main() {
 								for _, signal := range trackedSignals {
 									if signal.Status == user.EditableCoin {
 										mongo.CleanEditableSignals(mesChatUserID)
-
-										//signal.Status = user.DroppedCoin
-										//user.TrackedSignalSt.Store(mesChatUserID, trackedSignals)
-										//user.TrackedSignalSt.UpdateOne(mesChatUserID, trackedSignals[i].ObjectID, trackedSignals[i])
 									}
 								}
 								user.UserSt.Store(mesChatUserID, userObj)
@@ -3069,11 +2540,9 @@ func main() {
 
 									var keyboard tgbotapi.InlineKeyboardMarkup
 									var btns []tgbotapi.InlineKeyboardButton
-									//btns = []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("Изменить тип закупки", Sprintf("/change_buy_type_%s", signal.SignalCoin), )}
 									ID := strconv.FormatInt(signal.ObjectID, 10)
 
 									if signal.Status == user.IncomingCoin || signal.Status == user.EditableCoin {
-										//btns = []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("Изменить тип закупки", Sprintf("/change_buy_type_%s", signal.SignalCoin), )}
 										btns = []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData(Sprintf("Изменить объём закупки (%.4f BTC)", signal.BuyBTCQuantity), Sprintf("/change_buy_BTC_quantity_%s", ID))}
 										keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, btns)
 									}
@@ -3125,46 +2594,7 @@ func main() {
 					}
 				}
 			}
-		} //else {
-		//if strings.Contains(mesText, "/sell|") {
-		//	userObj.MonitoringStop = true
-		//	userObj.IsMonitoring = false
-		//	user.UserSt.Store(mesChatUserID, userObj)
-		//	sellArr := strings.Split(strings.TrimPrefix(mesText, "/sell|"), "|")
-		//	market := sellArr[0]
-		//	tickerBid := sellArr[1]
-		//	orderQuantity := sellArr[2]
-		//	if quantity, err := strconv.ParseFloat(orderQuantity, 64); err == nil {
-		//		if rate, err := strconv.ParseFloat(tickerBid, 64); err == nil {
-		//			rate += rate / 500
-		//			if orderUID, err := userObj.BittrexObj.SellLimit("BTC-"+market, quantity, rate); err == nil {
-		//				fmt.Println("||| orderUID, err = ", orderUID, err)
-		//				msg = tgbotapi.NewMessage(mesChatID, fmt.Sprintf("*Создан ордер с параметрами:*\n*Монета*: %v\n*UID:* %s\n*Цена по ордеру:* %v", " ["+market+"](https://bittrex.com/Market/Index?MarketName=BTC-"+market+")", orderUID, Sprintf("%.8f", rate)))
-		//				keyboard := tgbotapi.InlineKeyboardMarkup{}
-		//				var btns []tgbotapi.InlineKeyboardButton
-		//				btnCancel := tgbotapi.NewInlineKeyboardButtonData("Отменить", "/cancel|"+orderUID)
-		//				btnRefresh := tgbotapi.NewInlineKeyboardButtonData("Статус ордера", "/refresh|"+orderUID)
-		//				btns = append(btns, []tgbotapi.InlineKeyboardButton{btnCancel, btnRefresh}...)
-		//				keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, btns)
-		//				msg.ReplyMarkup = keyboard
-		//				msg.ParseMode = "Markdown"
-		//			} else {
-		//				if strings.Contains(fmt.Sprintln(err), "INSUFFICIENT_FUNDS") {
-		//					msg = tgbotapi.NewMessage(mesChatID, "Ошибка при создании ордера: недостаточно средств."+fmt.Sprintln(err))
-		//				} else if strings.Contains(fmt.Sprintln(err), "WHITELIST_VIOLATION_IP") {
-		//					msg = tgbotapi.NewMessage(mesChatID, "Ошибка при создании ордера: IP сервера бота не добавлен в whitelist."+fmt.Sprintln(err))
-		//				} else {
-		//					msg = tgbotapi.NewMessage(mesChatID, "Ошибка при создании ордера: "+fmt.Sprintln(err))
-		//				}
-		//			}
-		//		}
-		//	}
-		//	if _, err := bot.Send(msg); err != nil {
-		//		log.Println("||| main: error while message sending 27: err = ", err)
-		//	}
-		//	continue
-		//}
-		//}
+		} 
 	}
 }
 
@@ -3186,7 +2616,6 @@ func getBTCPrice() {
 				data = data["result"].(map[string]interface{})
 				data = data["bpi"].(map[string]interface{})
 				data = data["USD"].(map[string]interface{})
-				//fmt.Println("||| getBTCPrice data = ", data)
 				btcPrice = strings.Replace(strings.TrimSuffix(fmt.Sprintln(data["rate_float"]), "\n"), ",", "", 1)
 			}
 		}
@@ -3199,24 +2628,12 @@ func getBTCPrice() {
 func Preparation(mesText string, userObj user.User, mesChatID int64, mesChatUserID string, mesChatUserFisrtName string) bool {
 	fmt.Println("||| Preparation mesChatUserID = ", mesChatUserID)
 	fmt.Println("||| Preparation mesChatUserFisrtName = ", mesChatUserFisrtName)
-
-	//if mesChatUserFisrtName == "bittrexTelegramBot" {
-	//	return false
-	//}
-
 	fmt.Println("||| userObj = ", userObj)
 	if userObj.CiphertextKey != "" && userObj.CiphertextSecret != "" {
-		fmt.Println("||| Preparation 1 ")
-
-		//fmt.Println("||| 1 user.APIKey = ", userObj.APIKey)
-		//fmt.Println("||| 1 user.APISecret = ", userObj.APISecret)
-		//fmt.Println("||| 1 user.CiphertextKey = ", userObj.APIKey)
-		//fmt.Println("||| 1 user.CiphertextSecret = ", userObj.APISecret)
 		if ciphertextAPIKeyDecr := tools.Decrypt(tools.KeyGen(mesChatUserID), userObj.CiphertextKey); ciphertextAPIKeyDecr == "" {
 			log.Println("||| main: error while Decrypt APIKey: err = ", err)
 		} else {
 			userObj.APIKey = ciphertextAPIKeyDecr
-			//fmt.Println("||| ciphertextAPIKeyDecrs = ", ciphertextAPIKeyDecr)
 		}
 		if ciphertextAPISecretDecr := tools.Decrypt(tools.KeyGen(mesChatUserID), userObj.CiphertextSecret); ciphertextAPISecretDecr == "" {
 			log.Println("||| main: error while Decrypt APISecret: err = ", err)
@@ -3230,8 +2647,6 @@ func Preparation(mesText string, userObj user.User, mesChatID int64, mesChatUser
 		if userObj.Subscriptions == nil {
 			userObj.Subscriptions = map[string]user.Subscription{}
 		}
-		//userObj.OrderPercIncMap = map[string]string{}
-		//userObj.OrderPercDecMap = map[string]string{}
 		user.UserSt.Store(mesChatUserID, userObj)
 		go user.RefreshUsersData()
 	} else {
@@ -3331,21 +2746,7 @@ func Preparation(mesText string, userObj user.User, mesChatID int64, mesChatUser
 					}
 					user.UserSt.Store(mesChatUserID, userObj)
 					go user.RefreshUsersData()
-					//msg := tgbotapi.NewMessage(mesChatID, smiles.THUMBS_UP_SIGN+" API-KEY и API-SECRET корректны. "+smiles.THUMBS_UP_SIGN)
-					//if _, err := bot.Send(msg); err != nil {
-					//	log.Println("||| main: error while message sending 6: err = ", err)
-					//}
-					//keyboard := tgbotapi.InlineKeyboardMarkup{}
-					//btns := append([]tgbotapi.InlineKeyboardButton{}, tgbotapi.NewInlineKeyboardButtonData("Начать пользоваться ботом", "/start"))
-					//keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, btns)
-					//msg.ReplyMarkup = keyboard
-					//if user.UserPropMap[mesChatUserID].IsMonitoring {
-
-					//	mutex.Lock()
-					//	user.UserPropMap[mesChatUserID] = userObj
-					//	mutex.Unlock()
-					//	go RefreshUsersData()
-					//}
+				
 					msgText := fmt.Sprintf("*Доброе время суток, %s!\n*", mesChatUserFisrtName) +
 						"Для получения доступных команд нажмите *Список команд* или введите команду */help* и нажмите enter."
 					if err := telegram.SendMessageDeferred(mesChatID, msgText, "Markdown", config.KeyboardMainMenu); err != nil {
@@ -3421,18 +2822,8 @@ func IsOrderLogick(mesText string, userObj user.User, mesChatID int64, mesChatUs
 				targetCoin := strings.TrimPrefix(mesText, "/buy|")
 				msg.ParseMode = "Markdown"
 				keyboard := tgbotapi.InlineKeyboardMarkup{}
-				//if _, err := bot.Send(msg); err != nil {
-				//	log.Println("||| main: error while message sending 62: err = ", err)
-				//}
-				//msg = tgbotapi.NewMessage(mesChatID, "*Выберите опции покупки:*")
 				btnNonFixedPrice := tgbotapi.NewInlineKeyboardButtonData("Ввести сумму для покупки", "/buyNonFixedPrice|"+targetCoin)
 				keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, append([]tgbotapi.InlineKeyboardButton{}, btnNonFixedPrice))
-				//if (BTCBalance.Available/100)*5 > 0.0005 {
-				//	btn5Percent := tgbotapi.NewInlineKeyboardButtonData(fmt.Sprintf("Купить на 5 процентов BTC-депо (%.8f)", (BTCBalance.Available/100)*5, ), "/buy5Percent|"+targetCoin+"|"+Sprintf("%.8f", BTCBalance.Available))
-				//	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, append([]tgbotapi.InlineKeyboardButton{}, btn5Percent))
-				//}
-				//btnMin := tgbotapi.NewInlineKeyboardButtonData("Купить минимальный объём 0.0005 BTC ", "/buyMin|"+targetCoin)
-				//keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, append([]tgbotapi.InlineKeyboardButton{}, btnMin))
 				msg.ReplyMarkup = keyboard
 				msg.ParseMode = "Markdown"
 				if _, err := bot.Send(msg); err != nil {
@@ -3468,7 +2859,6 @@ func IsOrderLogick(mesText string, userObj user.User, mesChatID int64, mesChatUs
 	if orderVol, err := strconv.ParseFloat(mesText, 64); err != nil {
 		fmt.Println("||| main: buyNonFixedPrice: ParseFloat err = ", err)
 	} else {
-		//fmt.Println("||| main: buyNonFixedPrice: user.UserPropMap[mesChatUserID].MarketToBuy = ", user.UserPropMap[mesChatUserID].MarketToBuy)
 		user.Mutex.RLock()
 		userObj, _ = user.UserSt.Load(mesChatUserID)
 		if summary, err := thebotguysBittrex.GetMarketSummary(userObj.MarketToBuy); err != nil {
@@ -3485,7 +2875,6 @@ func IsOrderLogick(mesText string, userObj user.User, mesChatID int64, mesChatUs
 			orderQuantity = orderVol
 			fmt.Println("||| buyNonFixedPrice summary.Ask = ", summary.Ask)
 			fmt.Println("||| buyNonFixedPrice orderQuantity = ", orderQuantity)
-			//fmt.Println("||| buyNonFixedPrice user.UserPropMap[mesChatUserID].MarketToBuy = ", "X"+user.UserPropMap[mesChatUserID].MarketToBuy+"X")
 			userObj, _ = user.UserSt.Load(mesChatUserID)
 			if orderUID, err := userObj.BittrexObj.BuyLimit(strings.ToLower(userObj.MarketToBuy), orderQuantity, 0.0000001); err == nil {
 				fmt.Println("||| orderUID = ", orderUID)
@@ -3496,10 +2885,7 @@ func IsOrderLogick(mesText string, userObj user.User, mesChatID int64, mesChatUs
 			user.UserSt.Store(mesChatUserID, userObj)
 		}
 	}
-	if strings.Contains(mesText, "/buy5Percent|") {
-		// targetCoin := strings.TrimPrefix(mesText, "/buy5Percent|")
-		// userObj.BittrexObj.BuyLimit(targetCoin, 0.001, 0.001)
-	}
+	
 	userObj, _ = user.UserSt.Load(mesChatUserID)
 	if strings.Contains(mesText, "/refreshCoinInfo") && userObj.OrderFlag == true {
 		userObj.OrderFlag = false
@@ -3525,14 +2911,6 @@ func procCheck(pid int) {
 	}
 }
 
-func procInit() {
-	//fmt.Println("||| procInit 1")
-	//cmd := exec.Command("/home/deus/go/src/telegramgo-master/tlg")
-	//cmd.Start()
-	//go cmd.Wait()
-	//procCheck(cmd.Process.Pid)
-}
-
 func forwardedMessageHandler(mesChatID int64, message string, update tgbotapi.Update) bool {
 
 	mesChatUserID := strconv.FormatInt(mesChatID, 10)
@@ -3540,10 +2918,6 @@ func forwardedMessageHandler(mesChatID int64, message string, update tgbotapi.Up
 	userObj, _ := user.UserSt.Load(mesChatUserID)
 
 	if strings.TrimSpace(message) != "" {
-		// @deus_terminus = 413075018
-		// @bittrex_telegram_bot = 383869508
-		// @superAlexx = 423808655
-		// @alexander_stelmashenko = 286496819
 		if mesChatUserID != "383869508" && mesChatUserID != "286496819" {
 			if strings.Contains(message, "joinchat") {
 				fmt.Println("||| fucking joinchat")
@@ -3571,11 +2945,6 @@ func forwardedMessageHandler(mesChatID int64, message string, update tgbotapi.Up
 					var channelID int64
 
 					if update.Message.ForwardFromChat != nil {
-						fmt.Println("update.Message.ForwardFromChat.UserName = ", update.Message.ForwardFromChat.UserName)
-						fmt.Println("update.Message.ForwardFromChat.InviteLink = ", update.Message.ForwardFromChat.InviteLink)
-						fmt.Println("update.Message.ForwardFromChat.Title = ", update.Message.ForwardFromChat.Title)
-						fmt.Println("update.Message.ForwardFromChat.Description = ", update.Message.ForwardFromChat.Description)
-						fmt.Println("update.Message.ForwardFromChat.ChatConfig = ", update.Message.ForwardFromChat.ChatConfig())
 						channelTitle = update.Message.ForwardFromChat.Title
 						channelID = update.Message.ForwardFromChat.ID
 						channelUserName = update.Message.ForwardFromChat.UserName
@@ -3679,7 +3048,6 @@ func forwardedMessageHandler(mesChatID int64, message string, update tgbotapi.Up
 							}
 						}
 						if coinExist[newCoin] {
-							// indicatorData[len(indicatorData)-5:]
 							msgText := fmt.Sprintf("%s *Монета %s уже присутствует в списке монет*:\n%v\n\n Сообщение:\n %s", user.CoinAlreadyInListTag, newCoin, coinsList, message)
 							if err := telegram.SendMessageDeferred(mesChatID, msgText, "Markdown", nil); err != nil {
 								fmt.Println("||| telegram: error while message sending newCoinToList: err = ", err)
@@ -3790,11 +3158,6 @@ func forwardedMessageHandler(mesChatID int64, message string, update tgbotapi.Up
 					}
 				} else {
 					return false
-					//msgText := fmt.Sprintf(user.MesWithNoCoinTag+" В переотправленном сообщении не найдено монет из списка монет bittrex:\n%s", message)
-					//if err := telegram.SendMessageDeferred(mesChatID, msgText, "Markdown", nil); err != nil {
-					//	fmt.Println("||| telegram: error while message sending newCoinToList: err = ", err)
-					//}
-					//fmt.Printf("||| telegram: RegexCoinCheck failed: no coin were founded in bittrex coin list: \n %v \n", message)
 				}
 			}
 		}
